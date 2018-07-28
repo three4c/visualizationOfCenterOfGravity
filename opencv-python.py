@@ -48,9 +48,10 @@ if __name__ == '__main__':
             rectsGreen = colorTracking(frame, Green())
 
             if len(rectsGreen) > 0:
-                x, y, w, h = max(rectsGreen, key=(lambda x: x[2] * x[3]))
-                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
-                cv2.circle(frame, (int(x + w / 2), int(y + h / 2)), 5, (0,0,255), -1)
+                rect = max(rectsGreen, key=(lambda x: x[2] * x[3]))
+                x, y, w, h = rect
+                cv2.rectangle(frame, (x,y), (x+w, y+h), (0, 255, 0), 3)
+                cv2.circle(frame, (int(x+w/2), int(y+h/2)), 5, (0,0,255), -1)
 
             cv2.imshow('frame', frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
