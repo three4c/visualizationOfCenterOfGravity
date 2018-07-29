@@ -4,7 +4,7 @@ from collections import deque
 
 class Green:
     def __init__(self):
-        self.lower = np.array([40, 50, 50])
+        self.lower = np.array([40, 0, 0])
         self.upper = np.array([80, 255, 255])
 
 def colorTracking(frame, colorObj):
