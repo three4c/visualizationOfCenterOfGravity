@@ -2,9 +2,19 @@ import numpy as np
 import cv2
 from collections import deque
 
+class Red:
+    def __init__(self):
+        self.lower = np.array([150, 50, 50])
+        self.upper = np.array([180, 255, 255])
+
+class Blue:
+    def __init__(self):
+        self.lower = np.array([100, 60, 60])
+        self.upper = np.array([140, 255, 255])
+
 class Green:
     def __init__(self):
-        self.lower = np.array([40, 0, 0])
+        self.lower = np.array([40, 50, 50])
         self.upper = np.array([80, 255, 255])
 
 def colorTracking(frame, colorObj):
