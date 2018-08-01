@@ -72,22 +72,24 @@ if __name__ == '__main__':
 
             points = [bpoints, gpoints, rpoints, ypoints]
 
-            xFront = 0
-            xBack = 0
+
 
             for i in range(len(points)):
                 for j in range(len(points[i])):
+                    xFront = 0
+                    xBack = 0
                     for k in range(1, len(points[i][j])):
                         if points[i][j][k - 1] is None or points[i][j][k] is None: continue
-
                         # Circle
                         cv2.line(frame, points[i][j][k - 1], points[i][j][k], colors[0], 2)
-
                         # Line graph
                         front = points[i][j][k - 1]
                         back = points[i][j][k]
                         xBack += abs(front[0] - back[0])
                         cv2.line(frame, (xFront, front[1]), (xBack, back[1]), colors[1], 2)
+                        print("--------------------")
+                        print("kf: {0}, x: {1}, y: {2}".format(k, xFront, front[1]))
+                        print("kb: {0}, x: {1}, y: {2}".format(k, xBack, back[1]))
                         xFront = xBack
 
             cv2.imshow("frame", frame)
