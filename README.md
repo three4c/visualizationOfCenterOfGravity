@@ -1,1 +1,1 @@
-# windomill
+# windmill
