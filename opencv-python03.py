@@ -59,7 +59,7 @@ if __name__ == '__main__':
 
         if ret == True:
             frame = cv2.flip(frame, 1)
-            rectsGreen = colorTracking(frame, Green())
+            rectsGreen = colorTracking(frame, Blue())
 
             if len(rectsGreen) > 0:
                 height = [0, 0]
@@ -93,7 +93,6 @@ if __name__ == '__main__':
                     xBack = 0
                     for k in range(1, len(points[i][j])):
                         if points[i][j][k - 1] is None or points[i][j][k] is None: continue
-
                         # Circle
                         cv2.line(frame, points[i][j][k - 1], points[i][j][k], colors[0], 2)
 
@@ -111,8 +110,11 @@ if __name__ == '__main__':
             if key == ord("w"):
                 bpoints = gpoints = rpoints = ypoints = [deque(maxlen=512)]
                 bindex = gindex = rindex = yindex = 0
-                csvBodyRotation = csvBodyCentroid = xBody = []
-                xAbs = l = 0
+                csvBodyRotation = []
+                csvBodyCentroid = []
+                xBody = []
+                xAbs = 0
+                l = 0
             if key == ord("s"):
                 cv2.imwrite("photo.jpg", frame)
 
