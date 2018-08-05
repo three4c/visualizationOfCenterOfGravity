@@ -3,7 +3,7 @@ import cv2
 import csv
 from collections import deque
 
-# Class
+# Color
 class Red:
     def __init__(self):
         self.lower = np.array([150, 50, 50])
@@ -93,6 +93,7 @@ if __name__ == '__main__':
                     xBack = 0
                     for k in range(1, len(points[i][j])):
                         if points[i][j][k - 1] is None or points[i][j][k] is None: continue
+                        
                         # Circle
                         cv2.line(frame, points[i][j][k - 1], points[i][j][k], colors[0], 2)
 
@@ -101,9 +102,6 @@ if __name__ == '__main__':
                         back = points[i][j][k]
                         xBack += abs(front[0] - back[0])
                         cv2.line(frame, (xFront, front[1]), (xBack, back[1]), colors[1], 2)
-                        # print("--------------------")
-                        # print("kf: {0}, x: {1}, y: {2}".format(k, xFront, front[1]))
-                        # print("kb: {0}, x: {1}, y: {2}".format(k, xBack, back[1]))
                         xFront = xBack
 
             cv2.imshow("frame", frame)
@@ -113,8 +111,8 @@ if __name__ == '__main__':
             if key == ord("w"):
                 bpoints = gpoints = rpoints = ypoints = [deque(maxlen=512)]
                 bindex = gindex = rindex = yindex = 0
-                csvBodyRotation = []
-                csvBodyCentroid = []
+                csvBodyRotation = csvBodyCentroid = xBody = []
+                xAbs = l = 0
             if key == ord("s"):
                 cv2.imwrite("photo.jpg", frame)
 
