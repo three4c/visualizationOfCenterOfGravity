@@ -93,7 +93,7 @@ if __name__ == '__main__':
                     xBack = 0
                     for k in range(1, len(points[i][j])):
                         if points[i][j][k - 1] is None or points[i][j][k] is None: continue
-                        
+
                         # Circle
                         cv2.line(frame, points[i][j][k - 1], points[i][j][k], colors[0], 2)
 
