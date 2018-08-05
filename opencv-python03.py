@@ -1,7 +1,9 @@
 import numpy as np
 import cv2
+import csv
 from collections import deque
 
+# Class
 class Red:
     def __init__(self):
         self.lower = np.array([150, 50, 50])
@@ -17,6 +19,7 @@ class Green:
         self.lower = np.array([40, 50, 50])
         self.upper = np.array([80, 255, 255])
 
+# Function
 def colorTracking(frame, colorObj):
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(hsv, colorObj.lower, colorObj.upper)
@@ -34,13 +37,22 @@ def colorTracking(frame, colorObj):
 
     return rects
 
-kernel = np.ones((5, 5), np.uint8)
-bpoints = gpoints = rpoints = ypoints = [deque(maxlen=512)]
-bindex = gindex = rindex = yindex = 0
-colors = [(0, 255, 0), (0, 0, 255)]
-
+# Main
 if __name__ == '__main__':
+
+    kernel = np.ones((5, 5), np.uint8)
+    bpoints = gpoints = rpoints = ypoints = [deque(maxlen=512)]
+    bindex = gindex = rindex = yindex = 0
+    colors = [(0, 255, 0), (0, 0, 255)]
+
+    csvHeader = ['X Coordinate', 'Y Coordinate']
+    csvBodyRotation = []
+    csvBodyCentroid = []
+
     cap = cv2.VideoCapture(0)
+    xBody = []
+    xAbs = 0
+    l = 0
 
     while(True):
         ret, frame = cap.read()
@@ -50,15 +62,18 @@ if __name__ == '__main__':
             rectsGreen = colorTracking(frame, Green())
 
             if len(rectsGreen) > 0:
-                # cnt = sorted(rectsGreen, key = cv2.contourArea, reverse = True)[0]
-                # ((x, y), radius) = cv2.minEnclosingCircle(cnt)
-                # cv2.circle(frame, (int(x), int(y)), int(radius), (0, 255, 255), 2)
-                # M = cv2.moments(cnt)
+                height = [0, 0]
                 rx, ry, rw, rh = max(rectsGreen, key=(lambda x: x[2] * x[3]))
                 cv2.rectangle(frame, (rx, ry), (rx + rw, ry + rh), (0, 255, 0), 3)
                 cv2.circle(frame, (int(rx + rw / 2), int(ry + rh / 2)), 5, (0,0,255), -1)
                 center = (int(rx + rw / 2), int(ry + rh / 2))
                 bpoints[bindex].appendleft(center)
+                csvBodyRotation.append(center)
+                xBody.append(int(rx + rw / 2))
+                xAbs += abs(xBody[l-1] - xBody[l])
+                height = (xAbs, int(ry + rh / 2))
+                csvBodyCentroid.append(height)
+                l += 1
 
             else:
                 bpoints.append(deque(maxlen=512))
@@ -80,14 +95,15 @@ if __name__ == '__main__':
                         if points[i][j][k - 1] is None or points[i][j][k] is None: continue
                         # Circle
                         cv2.line(frame, points[i][j][k - 1], points[i][j][k], colors[0], 2)
+
                         # Line graph
                         front = points[i][j][k - 1]
                         back = points[i][j][k]
                         xBack += abs(front[0] - back[0])
                         cv2.line(frame, (xFront, front[1]), (xBack, back[1]), colors[1], 2)
-                        print("--------------------")
-                        print("kf: {0}, x: {1}, y: {2}".format(k, xFront, front[1]))
-                        print("kb: {0}, x: {1}, y: {2}".format(k, xBack, back[1]))
+                        # print("--------------------")
+                        # print("kf: {0}, x: {1}, y: {2}".format(k, xFront, front[1]))
+                        # print("kb: {0}, x: {1}, y: {2}".format(k, xBack, back[1]))
                         xFront = xBack
 
             cv2.imshow("frame", frame)
@@ -97,10 +113,22 @@ if __name__ == '__main__':
             if key == ord("w"):
                 bpoints = gpoints = rpoints = ypoints = [deque(maxlen=512)]
                 bindex = gindex = rindex = yindex = 0
+                csvBodyRotation = []
+                csvBodyCentroid = []
             if key == ord("s"):
                 cv2.imwrite("photo.jpg", frame)
 
         else: break
+
+    with open('bodyRotation.csv', 'w') as f:
+            writer = csv.writer(f, lineterminator='\n')
+            writer.writerow(csvHeader)
+            writer.writerows(csvBodyRotation)
+
+    with open('bodyCentroid.csv', 'w') as f:
+            writer = csv.writer(f, lineterminator='\n')
+            writer.writerow(csvHeader)
+            writer.writerows(csvBodyCentroid)
 
     cap.release()
     cv2.destroyAllWindows()
