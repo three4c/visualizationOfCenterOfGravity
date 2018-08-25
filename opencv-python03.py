@@ -59,7 +59,7 @@ if __name__ == '__main__':
 
         if ret == True:
             frame = cv2.flip(frame, 1)
-            rectsGreen = colorTracking(frame, Blue())
+            rectsGreen = colorTracking(frame, Green())
 
             if len(rectsGreen) > 0:
                 height = [0, 0]
