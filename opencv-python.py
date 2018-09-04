@@ -45,7 +45,6 @@ if __name__ == '__main__':
     bindex = gindex = rindex = yindex = 0
     colors = [(0, 255, 0), (0, 0, 255)]
 
-    csvHeader = ['X Coordinate', 'Y Coordinate']
     csvBodyRotation = []
     csvBodyCentroid = []
 
@@ -122,12 +121,10 @@ if __name__ == '__main__':
 
     with open('bodyRotation.csv', 'w') as f:
             writer = csv.writer(f, lineterminator='\n')
-            writer.writerow(csvHeader)
             writer.writerows(csvBodyRotation)
 
     with open('bodyCentroid.csv', 'w') as f:
             writer = csv.writer(f, lineterminator='\n')
-            writer.writerow(csvHeader)
             writer.writerows(csvBodyCentroid)
 
     cap.release()
