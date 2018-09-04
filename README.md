@@ -10,5 +10,5 @@ pipenv install
 
 ### start
 ```
-pipenv  run python opencv-python
+pipenv run python opencv-python
 ```
