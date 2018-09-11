@@ -48,76 +48,75 @@ if __name__ == '__main__':
     csvBodyRotation = []
     csvBodyCentroid = []
 
-    cap = cv2.VideoCapture(0)
+    cap01 = cv2.VideoCapture(0)
+    cap02 = cv2.VideoCapture(1)
+    cap03 = cv2.VideoCapture(2)
     xBody = []
     xAbs = 0
     l = 0
 
     while(True):
-        ret, frame = cap.read()
+        _, frame02 = cap02.read()
 
-        if ret == True:
-            frame = cv2.flip(frame, 1)
-            rectsGreen = colorTracking(frame, Green())
+        frame02 = cv2.flip(frame02, 1)
+        rectsGreen = colorTracking(frame02, Green())
 
-            if len(rectsGreen) > 0:
-                height = [0, 0]
-                rx, ry, rw, rh = max(rectsGreen, key=(lambda x: x[2] * x[3]))
-                cv2.rectangle(frame, (rx, ry), (rx + rw, ry + rh), (0, 255, 0), 3)
-                cv2.circle(frame, (int(rx + rw / 2), int(ry + rh / 2)), 5, (0,0,255), -1)
-                center = (int(rx + rw / 2), int(ry + rh / 2))
-                bpoints[bindex].appendleft(center)
-                csvBodyRotation.append(center)
-                xBody.append(int(rx + rw / 2))
-                xAbs += abs(xBody[l-1] - xBody[l])
-                height = (xAbs, int(ry + rh / 2))
-                csvBodyCentroid.append(height)
-                l += 1
+        if len(rectsGreen) > 0:
+            height = [0, 0]
+            rx, ry, rw, rh = max(rectsGreen, key=(lambda x: x[2] * x[3]))
+            cv2.rectangle(frame02, (rx, ry), (rx + rw, ry + rh), (0, 255, 0), 3)
+            cv2.circle(frame02, (int(rx + rw / 2), int(ry + rh / 2)), 5, (0,0,255), -1)
+            center = (int(rx + rw / 2), int(ry + rh / 2))
+            bpoints[bindex].appendleft(center)
+            csvBodyRotation.append(center)
+            xBody.append(int(rx + rw / 2))
+            xAbs += abs(xBody[l-1] - xBody[l])
+            height = (xAbs, int(ry + rh / 2))
+            csvBodyCentroid.append(height)
+            l += 1
 
-            else:
-                bpoints.append(deque(maxlen=512))
-                bindex += 1
-                gpoints.append(deque(maxlen=512))
-                gindex += 1
-                rpoints.append(deque(maxlen=512))
-                rindex += 1
-                ypoints.append(deque(maxlen=512))
-                yindex += 1
+        else:
+            bpoints.append(deque(maxlen=512))
+            bindex += 1
+            gpoints.append(deque(maxlen=512))
+            gindex += 1
+            rpoints.append(deque(maxlen=512))
+            rindex += 1
+            ypoints.append(deque(maxlen=512))
+            yindex += 1
 
-            points = [bpoints, gpoints, rpoints, ypoints]
+        points = [bpoints, gpoints, rpoints, ypoints]
 
-            for i in range(len(points)):
-                for j in range(len(points[i])):
-                    xFront = 0
-                    xBack = 0
-                    for k in range(1, len(points[i][j])):
-                        if points[i][j][k - 1] is None or points[i][j][k] is None: continue
-                        # Circle
-                        cv2.line(frame, points[i][j][k - 1], points[i][j][k], colors[0], 2)
+        for i in range(len(points)):
+            for j in range(len(points[i])):
+                xFront = 0
+                xBack = 0
+                for k in range(1, len(points[i][j])):
+                    if points[i][j][k - 1] is None or points[i][j][k] is None: continue
+                    # Circle
+                    cv2.line(frame02, points[i][j][k - 1], points[i][j][k], colors[0], 2)
 
-                        # Line graph
-                        front = points[i][j][k - 1]
-                        back = points[i][j][k]
-                        xBack += abs(front[0] - back[0])
-                        cv2.line(frame, (xFront, front[1]), (xBack, back[1]), colors[1], 2)
-                        xFront = xBack
+                    # Line graph
+                    front = points[i][j][k - 1]
+                    back = points[i][j][k]
+                    xBack += abs(front[0] - back[0])
+                    cv2.line(frame02, (xFront, front[1]), (xBack, back[1]), colors[1], 2)
+                    xFront = xBack
 
-            cv2.imshow("frame", frame)
+        cv2.imshow("frame02", frame02)
 
-            key = cv2.waitKey(1) & 0xFF
-            if key == ord("q"): break
-            if key == ord("w"):
-                bpoints = gpoints = rpoints = ypoints = [deque(maxlen=512)]
-                bindex = gindex = rindex = yindex = 0
-                csvBodyRotation = []
-                csvBodyCentroid = []
-                xBody = []
-                xAbs = 0
-                l = 0
-            if key == ord("s"):
-                cv2.imwrite("photo.jpg", frame)
-
-        else: break
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord("q"): break
+        if key == ord("w"):
+            bpoints = gpoints = rpoints = ypoints = [deque(maxlen=512)]
+            bindex = gindex = rindex = yindex = 0
+            csvBodyRotation = []
+            csvBodyCentroid = []
+            xBody = []
+            xAbs = 0
+            l = 0
+        if key == ord("s"):
+            cv2.imwrite("photo.jpg", frame02)
 
     with open('bodyRotation.csv', 'w') as f:
             writer = csv.writer(f, lineterminator='\n')
@@ -127,5 +126,5 @@ if __name__ == '__main__':
             writer = csv.writer(f, lineterminator='\n')
             writer.writerows(csvBodyCentroid)
 
-    cap.release()
+    cap02.release()
     cv2.destroyAllWindows()
