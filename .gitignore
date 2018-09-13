@@ -1,5 +1,3 @@
 .DS_Store
-opencv-python01.py
-opencv-python02.py
-bodyCentroid.csv
-bodyRotation.csv
+UpperBodyTrajectory.csv
+WaistTrajectory.csv
