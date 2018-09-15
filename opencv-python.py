@@ -3,6 +3,17 @@ import cv2
 import csv
 from collections import deque
 
+# firebase
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import db
+
+cred = credentials.Certificate('./windmill-visualization-firebase-adminsdk-gsh6c-6e2cb505eb.json')
+firebase_admin.initialize_app(cred, {
+    'databaseURL': 'https://windmill-visualization.firebaseio.com/',
+    'databaseAuthVariableOverride': None
+})
+
 # Color
 class Red:
     def __init__(self):
@@ -159,6 +170,15 @@ if __name__ == '__main__':
         if key == ord("s"):
             cv2.imwrite("photo01.jpg", frame01)
             cv2.imwrite("photo02.jpg", frame02)
+
+    ref = db.reference('/public_resource')
+    ref.push({
+        'UpperBodyTrajectory': csvUpperBodyTrajectory,
+        'WaistTrajectory': csvWaistTrajectory
+    })
+
+    ## get data
+    print(ref.get())
 
     with open('UpperBodyTrajectory.csv', 'w') as f:
             writer = csv.writer(f, lineterminator='\n')
