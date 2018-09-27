@@ -62,6 +62,9 @@ if __name__ == '__main__':
 
     cap01 = cv2.VideoCapture(1)
     cap02 = cv2.VideoCapture(2)
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    out01 = cv2.VideoWriter('output01.mp4',fourcc, 20, (1280, 960))
+    out02 = cv2.VideoWriter('output02.mp4',fourcc, 20, (1280, 960))
 
     xBody = []
     xAbs = 0
@@ -139,6 +142,9 @@ if __name__ == '__main__':
                     cv2.line(frame02, (xFront, front[1]), (xBack, back[1]), colors[1], 2)
                     xFront = xBack
 
+        out01.write(frame01)
+        out02.write(frame02)
+
         cv2.namedWindow("Upper body trajectory", cv2.WINDOW_NORMAL)
         cv2.imshow("Upper body trajectory", frame01)
 
@@ -150,6 +156,8 @@ if __name__ == '__main__':
         if key == ord("q"):
             cap01.release()
             cap02.release()
+            out01.release()
+            out02.release()
             cv2.destroyAllWindows()
             break
 
@@ -177,7 +185,7 @@ if __name__ == '__main__':
         'WaistTrajectory': csvWaistTrajectory
     })
 
-    ## get data
+    # get data
     print(ref.get())
 
     with open('UpperBodyTrajectory.csv', 'w') as f:
