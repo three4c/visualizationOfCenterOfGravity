@@ -1,6 +1,5 @@
 import numpy as np
 import cv2
-import csv
 from collections import deque
 
 # firebase
@@ -30,7 +29,6 @@ class Green:
         self.lower = np.array([40, 50, 50])
         self.upper = np.array([80, 255, 255])
 
-# Function
 def colorTracking(frame, colorObj):
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(hsv, colorObj.lower, colorObj.upper)
@@ -48,7 +46,6 @@ def colorTracking(frame, colorObj):
 
     return rects
 
-# Main
 if __name__ == '__main__':
     kernel = np.ones((5, 5), np.uint8)
     bpoints01 = gpoints01 = rpoints01 = ypoints01 = [deque(maxlen=512)]
@@ -57,14 +54,16 @@ if __name__ == '__main__':
     bindex02 = gindex02 = rindex02 = yindex02 = 0
     colors = [(0, 255, 0), (0, 0, 255)]
 
-    csvUpperBodyTrajectory = []
-    csvWaistTrajectory = []
+    fbUpperBodyTrajectory = []
+    fbWaistTrajectory = []
 
     cap01 = cv2.VideoCapture(1)
     cap02 = cv2.VideoCapture(2)
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    out01 = cv2.VideoWriter('output01.mp4',fourcc, 20, (1280, 960))
-    out02 = cv2.VideoWriter('output02.mp4',fourcc, 20, (1280, 960))
+    out01 = cv2.VideoWriter('output01.mp4',fourcc, 25, (1280, 960))
+    out02 = cv2.VideoWriter('output01.webm',fourcc, 25, (1280, 960))
+    out03 = cv2.VideoWriter('output02.mp4',fourcc, 25, (1280, 960))
+    out04 = cv2.VideoWriter('output02.webm',fourcc, 25, (1280, 960))
 
     xBody = []
     xAbs = 0
@@ -85,7 +84,7 @@ if __name__ == '__main__':
             cv2.circle(frame01, (int(rx + rw / 2), int(ry + rh / 2)), 5, (0,0,255), -1)
             center01 = (int(rx + rw / 2), int(ry + rh / 2))
             bpoints01[bindex01].appendleft(center01)
-            csvUpperBodyTrajectory.append(center01)
+            fbUpperBodyTrajectory.append(center01)
 
             height = [0, 0]
             lx, ly, lw, lh = max(rectsGreen02, key=(lambda x: x[2] * x[3]))
@@ -96,7 +95,7 @@ if __name__ == '__main__':
             xBody.append(int(lx + lw / 2))
             xAbs += abs(xBody[l-1] - xBody[l])
             height = (xAbs, int(ly + lh / 2))
-            csvWaistTrajectory.append(height)
+            fbWaistTrajectory.append(height)
             l += 1
 
         else:
@@ -108,7 +107,6 @@ if __name__ == '__main__':
             rindex01 += 1
             ypoints01.append(deque(maxlen=512))
             yindex01 += 1
-
             bpoints02.append(deque(maxlen=512))
             bindex02 += 1
             gpoints02.append(deque(maxlen=512))
@@ -143,11 +141,12 @@ if __name__ == '__main__':
                     xFront = xBack
 
         out01.write(frame01)
-        out02.write(frame02)
+        out02.write(frame01)
+        out03.write(frame02)
+        out04.write(frame02)
 
         cv2.namedWindow("Upper body trajectory", cv2.WINDOW_NORMAL)
         cv2.imshow("Upper body trajectory", frame01)
-
         cv2.namedWindow("Waist trajectory", cv2.WINDOW_NORMAL)
         cv2.imshow("Waist trajectory", frame02)
 
@@ -158,22 +157,33 @@ if __name__ == '__main__':
             cap02.release()
             out01.release()
             out02.release()
+            out03.release()
+            out04.release()
             cv2.destroyAllWindows()
             break
 
         if key == ord("w"):
             bpoints01 = gpoints01 = rpoints01 = ypoints01 = [deque(maxlen=512)]
             bindex01 = gindex01 = rindex01 = yindex01 = 0
-
             bpoints02 = gpoints02 = rpoints02 = ypoints02 = [deque(maxlen=512)]
             bindex02 = gindex02 = rindex02 = yindex02 = 0
 
-            csvUpperBodyTrajectory = []
-            csvWaistTrajectory = []
+            fbUpperBodyTrajectory = []
+            fbWaistTrajectory = []
 
             xBody = []
             xAbs = 0
             l = 0
+
+            out01.release()
+            out02.release()
+            out03.release()
+            out04.release()
+
+            out01 = cv2.VideoWriter('output01.mp4',fourcc, 25, (1280, 960))
+            out02 = cv2.VideoWriter('output01.webm',fourcc, 25, (1280, 960))
+            out03 = cv2.VideoWriter('output02.mp4',fourcc, 25, (1280, 960))
+            out04 = cv2.VideoWriter('output02.webm',fourcc, 25, (1280, 960))
 
         if key == ord("s"):
             cv2.imwrite("photo01.jpg", frame01)
@@ -181,17 +191,9 @@ if __name__ == '__main__':
 
     ref = db.reference('/public_resource')
     ref.push({
-        'UpperBodyTrajectory': csvUpperBodyTrajectory,
-        'WaistTrajectory': csvWaistTrajectory
+        'UpperBodyTrajectory': fbUpperBodyTrajectory,
+        'WaistTrajectory': fbWaistTrajectory
     })
 
     # get data
     print(ref.get())
-
-    with open('UpperBodyTrajectory.csv', 'w') as f:
-            writer = csv.writer(f, lineterminator='\n')
-            writer.writerows(csvUpperBodyTrajectory)
-
-    with open('WaistTrajectory.csv', 'w') as f:
-            writer = csv.writer(f, lineterminator='\n')
-            writer.writerows(csvWaistTrajectory)
