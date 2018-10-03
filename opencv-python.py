@@ -7,11 +7,22 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
 
+#Pyrebase
+import pyrebase
+
 cred = credentials.Certificate('./windmill-visualization-firebase-adminsdk-gsh6c-6e2cb505eb.json')
 firebase_admin.initialize_app(cred, {
     'databaseURL': 'https://windmill-visualization.firebaseio.com/',
     'databaseAuthVariableOverride': None
 })
+
+config = {
+  'apiKey': 'AIzaSyCb-si6ZoNSjj5SwxbOg5Y_bzjXelB9jmU',
+  'authDomain': 'windmill-visualization.firebaseapp.com',
+  'databaseURL': 'https://windmill-visualization.firebaseio.com',
+  'storageBucket': 'windmill-visualization.appspot.com'
+}
+firebase = pyrebase.initialize_app(config)
 
 # Color
 class Red:
@@ -60,10 +71,8 @@ if __name__ == '__main__':
     cap01 = cv2.VideoCapture(1)
     cap02 = cv2.VideoCapture(2)
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    out01 = cv2.VideoWriter('output01.mp4',fourcc, 25, (1280, 960))
-    out02 = cv2.VideoWriter('output01.webm',fourcc, 25, (1280, 960))
-    out03 = cv2.VideoWriter('output02.mp4',fourcc, 25, (1280, 960))
-    out04 = cv2.VideoWriter('output02.webm',fourcc, 25, (1280, 960))
+    out01 = cv2.VideoWriter('output03.webm',fourcc, 25, (1280, 960))
+    out02 = cv2.VideoWriter('output04.webm',fourcc, 25, (1280, 960))
 
     xBody = []
     xAbs = 0
@@ -141,9 +150,7 @@ if __name__ == '__main__':
                     xFront = xBack
 
         out01.write(frame01)
-        out02.write(frame01)
-        out03.write(frame02)
-        out04.write(frame02)
+        out02.write(frame02)
 
         cv2.namedWindow("Upper body trajectory", cv2.WINDOW_NORMAL)
         cv2.imshow("Upper body trajectory", frame01)
@@ -157,8 +164,6 @@ if __name__ == '__main__':
             cap02.release()
             out01.release()
             out02.release()
-            out03.release()
-            out04.release()
             cv2.destroyAllWindows()
             break
 
@@ -177,13 +182,9 @@ if __name__ == '__main__':
 
             out01.release()
             out02.release()
-            out03.release()
-            out04.release()
 
-            out01 = cv2.VideoWriter('output01.mp4',fourcc, 25, (1280, 960))
-            out02 = cv2.VideoWriter('output01.webm',fourcc, 25, (1280, 960))
-            out03 = cv2.VideoWriter('output02.mp4',fourcc, 25, (1280, 960))
-            out04 = cv2.VideoWriter('output02.webm',fourcc, 25, (1280, 960))
+            out01 = cv2.VideoWriter('output03.webm',fourcc, 25, (1280, 960))
+            out02 = cv2.VideoWriter('output04.webm',fourcc, 25, (1280, 960))
 
         if key == ord("s"):
             cv2.imwrite("photo01.jpg", frame01)
@@ -194,6 +195,16 @@ if __name__ == '__main__':
         'UpperBodyTrajectory': fbUpperBodyTrajectory,
         'WaistTrajectory': fbWaistTrajectory
     })
+
+    path01 = 'output03.webm'
+    path02 = 'output04.webm'
+    storage = firebase.storage()
+    storage.child('video/output03.webm').put(path01)
+    storage.child('video/output04.webm').put(path02)
+    url01 = storage.child('video/output03.webm').get_url(token=None)
+    url02 = storage.child('video/output04.webm').get_url(token=None)
+    print(url01)
+    print(url02)
 
     # get data
     print(ref.get())
