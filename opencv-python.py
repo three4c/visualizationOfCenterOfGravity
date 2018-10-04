@@ -10,17 +10,25 @@ from firebase_admin import db
 #Pyrebase
 import pyrebase
 
-cred = credentials.Certificate('./windmill-visualization-firebase-adminsdk-gsh6c-6e2cb505eb.json')
+#dotenv
+import settings
+JSON_PATH = settings.JP
+API_KEY = settings.AP
+AUTH_DOMAIN = settings.AD
+DATABASE_URL = settings.DB
+STORAGE_BUCKET = settings.SB
+
+cred = credentials.Certificate(JSON_PATH)
 firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://windmill-visualization.firebaseio.com/',
+    'databaseURL': DATABASE_URL,
     'databaseAuthVariableOverride': None
 })
 
 config = {
-  'apiKey': 'AIzaSyCb-si6ZoNSjj5SwxbOg5Y_bzjXelB9jmU',
-  'authDomain': 'windmill-visualization.firebaseapp.com',
-  'databaseURL': 'https://windmill-visualization.firebaseio.com',
-  'storageBucket': 'windmill-visualization.appspot.com'
+  'apiKey': API_KEY,
+  'authDomain': AUTH_DOMAIN,
+  'databaseURL': DATABASE_URL,
+  'storageBucket': STORAGE_BUCKET
 }
 firebase = pyrebase.initialize_app(config)
 

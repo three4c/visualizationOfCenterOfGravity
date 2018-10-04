@@ -8,6 +8,7 @@ opencv-python = "*"
 numpy = "*"
 firebase-admin = "*"
 pyrebase = "*"
+python-dotenv = "*"
 
 [dev-packages]
 
