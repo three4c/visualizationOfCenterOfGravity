@@ -20,7 +20,7 @@ STORAGE_BUCKET = settings.SB
 
 cred = credentials.Certificate(JSON_PATH)
 firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://windmill-visualization.firebaseio.com/',
+    'databaseURL': DATABASE_URL,
     'databaseAuthVariableOverride': None
 })
 
