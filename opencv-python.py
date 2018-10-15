@@ -1,6 +1,5 @@
 import numpy as np
 import cv2
-import glob
 import os
 from collections import deque
 
@@ -85,8 +84,8 @@ if __name__ == '__main__':
     cap01 = cv2.VideoCapture(1)
     cap02 = cv2.VideoCapture(2)
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    out01 = cv2.VideoWriter('video/output0' + str(1 + fileSize) +  '.webm',fourcc, 25, (1280, 960))
-    out02 = cv2.VideoWriter('video/output0' + str(2 + fileSize) + '.webm',fourcc, 25, (1280, 960))
+    out01 = cv2.VideoWriter('video/output' + str(1 + fileSize) +  '.webm',fourcc, 25, (1280, 960))
+    out02 = cv2.VideoWriter('video/output' + str(2 + fileSize) + '.webm',fourcc, 25, (1280, 960))
 
     xBody = []
     xAbs = 0
@@ -147,7 +146,7 @@ if __name__ == '__main__':
                 for k in range(1, len(points01[i][j])):
                     if points01[i][j][k - 1] is None or points01[i][j][k] is None: continue
                     # Circle
-                    #cv2.line(frame01, points01[i][j][k - 1], points01[i][j][k], colors[0], 2)
+                    cv2.line(frame01, points01[i][j][k - 1], points01[i][j][k], colors[0], 2)
 
         for i in range(len(points02)):
             for j in range(len(points02[i])):
@@ -155,12 +154,11 @@ if __name__ == '__main__':
                 xBack = 0
                 for k in range(1, len(points02[i][j])):
                     if points02[i][j][k - 1] is None or points02[i][j][k] is None: continue
-
                     # Line graph
                     front = points02[i][j][k - 1]
                     back = points02[i][j][k]
                     xBack += abs(front[0] - back[0])
-                    #cv2.line(frame02, (xFront, front[1]), (xBack, back[1]), colors[1], 2)
+                    cv2.line(frame02, (xFront, front[1]), (xBack, back[1]), colors[1], 2)
                     xFront = xBack
 
         out01.write(frame01)
@@ -197,21 +195,21 @@ if __name__ == '__main__':
             out01.release()
             out02.release()
 
-            out01 = cv2.VideoWriter('video/output0' + str(1 + fileSize) +  '.webm',fourcc, 25, (1280, 960))
-            out02 = cv2.VideoWriter('video/output0' + str(2 + fileSize) + '.webm',fourcc, 25, (1280, 960))
+            out01 = cv2.VideoWriter('video/output' + str(1 + fileSize) +  '.webm',fourcc, 25, (1280, 960))
+            out02 = cv2.VideoWriter('video/output' + str(2 + fileSize) + '.webm',fourcc, 25, (1280, 960))
 
         if key == ord("s"):
-            cv2.imwrite('photo/photo01.jpg', frame01)
-            cv2.imwrite('photo/photo02.jpg', frame02)
+            cv2.imwrite('photo/photo1.jpg', frame01)
+            cv2.imwrite('photo/photo2.jpg', frame02)
 
-    path01 = 'video/output0' + str(1 + fileSize) + '.webm'
-    path02 = 'video/output0' + str(2 + fileSize) + '.webm'
+    path01 = 'video/output' + str(1 + fileSize) + '.webm'
+    path02 = 'video/output' + str(2 + fileSize) + '.webm'
     storage = firebase.storage()
-    storage.child('video/output0' + str(1 + fileSize) + '.webm').put(path01)
-    storage.child('video/output0' + str(2 + fileSize) + '.webm').put(path02)
-    url01 = storage.child('video/output0' + str(1 + fileSize) + '.webm').get_url(token=None)
-    url02 = storage.child('video/output0' + str(2 + fileSize) + '.webm').get_url(token=None)
-    print('svg01URL: {0} \nsvg02URL: {1}'.format(url02, url01))
+    storage.child('video/output' + str(1 + fileSize) + '.webm').put(path01)
+    storage.child('video/output' + str(2 + fileSize) + '.webm').put(path02)
+    url01 = storage.child('video/output' + str(1 + fileSize) + '.webm').get_url(token=None)
+    url02 = storage.child('video/output' + str(2 + fileSize) + '.webm').get_url(token=None)
+    #print('svg01URL: {0} \nsvg02URL: {1}'.format(url02, url01))
 
     ref = db.reference('/public_resource')
     ref.push({
