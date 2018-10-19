@@ -68,52 +68,35 @@ def colorTracking(frame, colorObj):
 
 if __name__ == '__main__':
     kernel = np.ones((5, 5), np.uint8)
-    bpoints01 = gpoints01 = rpoints01 = ypoints01 = [deque(maxlen=512)]
-    bindex01 = gindex01 = rindex01 = yindex01 = 0
-    bpoints02 = gpoints02 = rpoints02 = ypoints02 = [deque(maxlen=512)]
-    bindex02 = gindex02 = rindex02 = yindex02 = 0
+    bpoints = gpoints = rpoints = ypoints = [deque(maxlen=512)]
+    bindex = gindex = rindex = yindex = 0
     colors = [(0, 255, 0), (0, 0, 255)]
 
-    fbUpperBodyTrajectory = []
     fbWaistTrajectory = []
 
     path = './video'
     file = os.listdir(path)
     fileSize = len(file)
 
-    cap01 = cv2.VideoCapture(1)
-    cap02 = cv2.VideoCapture(2)
+    cap = cv2.VideoCapture(1)
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    out01 = cv2.VideoWriter('video/output' + str(1 + fileSize) +  '.webm',fourcc, 25, (1280, 960))
-    out02 = cv2.VideoWriter('video/output' + str(2 + fileSize) + '.webm',fourcc, 25, (1280, 960))
+    out = cv2.VideoWriter('video/output' + str(1 + fileSize) + '.webm',fourcc, 20, (1280, 960))
 
     xBody = []
     xAbs = 0
     l = 0
 
     while(True):
-        _, frame01 = cap01.read()
-        frame01 = cv2.flip(frame01, 1)
-        rectsGreen01 = colorTracking(frame01, Green())
+        _, frame = cap.read()
+        rectsGreen = colorTracking(frame, Blue())
 
-        _, frame02 = cap02.read()
-        frame02 = cv2.flip(frame02, 1)
-        rectsGreen02 = colorTracking(frame02, Green())
-
-        if len(rectsGreen01) > 0 and len(rectsGreen02) > 0:
-            rx, ry, rw, rh = max(rectsGreen01, key=(lambda x: x[2] * x[3]))
-            cv2.rectangle(frame01, (rx, ry), (rx + rw, ry + rh), (0, 255, 0), 3)
-            #cv2.circle(frame01, (int(rx + rw / 2), int(ry + rh / 2)), 5, (0,0,255), -1)
-            center01 = (int(rx + rw / 2), int(ry + rh / 2))
-            bpoints01[bindex01].appendleft(center01)
-            fbUpperBodyTrajectory.append(center01)
-
+        if len(rectsGreen) > 0:
             height = [0, 0]
-            lx, ly, lw, lh = max(rectsGreen02, key=(lambda x: x[2] * x[3]))
-            cv2.rectangle(frame02, (lx, ly), (lx + lw, ly + lh), (0, 255, 0), 3)
-            #cv2.circle(frame02, (int(lx + lw / 2), int(ly + lh / 2)), 5, (0,0,255), -1)
-            center02 = (int(lx + lw / 2), int(ly + lh / 2))
-            bpoints02[bindex02].appendleft(center02)
+            lx, ly, lw, lh = max(rectsGreen, key=(lambda x: x[2] * x[3]))
+            cv2.rectangle(frame, (lx, ly), (lx + lw, ly + lh), (0, 255, 0), 3)
+            cv2.circle(frame, (int(lx + lw / 2), int(ly + lh / 2)), 5, (0,0,255), -1)
+            center = (int(lx + lw / 2), int(ly + lh / 2))
+            bpoints[bindex].appendleft(center)
             xBody.append(int(lx + lw / 2))
             xAbs += abs(xBody[l-1] - xBody[l])
             height = (xAbs, int(ly + lh / 2))
@@ -121,102 +104,67 @@ if __name__ == '__main__':
             l += 1
 
         else:
-            bpoints01.append(deque(maxlen=512))
-            bindex01 += 1
-            gpoints01.append(deque(maxlen=512))
-            gindex01 += 1
-            rpoints01.append(deque(maxlen=512))
-            rindex01 += 1
-            ypoints01.append(deque(maxlen=512))
-            yindex01 += 1
-            bpoints02.append(deque(maxlen=512))
-            bindex02 += 1
-            gpoints02.append(deque(maxlen=512))
-            gindex02 += 1
-            rpoints02.append(deque(maxlen=512))
-            rindex02 += 1
-            ypoints02.append(deque(maxlen=512))
-            yindex02 += 1
+            bpoints.append(deque(maxlen=512))
+            bindex += 1
+            gpoints.append(deque(maxlen=512))
+            gindex += 1
+            rpoints.append(deque(maxlen=512))
+            rindex += 1
+            ypoints.append(deque(maxlen=512))
+            yindex += 1
 
-        points01 = [bpoints01, gpoints01, rpoints01, ypoints01]
-        points02 = [bpoints02, gpoints02, rpoints02, ypoints02]
+        points = [bpoints, gpoints, rpoints, ypoints]
 
-        for i in range(len(points01)):
-            for j in range(len(points01[i])):
-                for k in range(1, len(points01[i][j])):
-                    if points01[i][j][k - 1] is None or points01[i][j][k] is None: continue
-                    # Circle
-                    cv2.line(frame01, points01[i][j][k - 1], points01[i][j][k], colors[0], 2)
-
-        for i in range(len(points02)):
-            for j in range(len(points02[i])):
+        for i in range(len(points)):
+            for j in range(len(points[i])):
                 xFront = 0
                 xBack = 0
-                for k in range(1, len(points02[i][j])):
-                    if points02[i][j][k - 1] is None or points02[i][j][k] is None: continue
+                for k in range(1, len(points[i][j])):
+                    if points[i][j][k - 1] is None or points[i][j][k] is None: continue
                     # Line graph
-                    front = points02[i][j][k - 1]
-                    back = points02[i][j][k]
+                    front = points[i][j][k - 1]
+                    back = points[i][j][k]
                     xBack += abs(front[0] - back[0])
-                    cv2.line(frame02, (xFront, front[1]), (xBack, back[1]), colors[1], 2)
+                    cv2.line(frame, (xFront, front[1]), (xBack, back[1]), colors[1], 2)
                     xFront = xBack
 
-        out01.write(frame01)
-        out02.write(frame02)
+        out.write(frame)
 
-        cv2.namedWindow("Upper body trajectory", cv2.WINDOW_NORMAL)
-        cv2.imshow("Upper body trajectory", frame01)
         cv2.namedWindow("Waist trajectory", cv2.WINDOW_NORMAL)
-        cv2.imshow("Waist trajectory", frame02)
+        cv2.imshow("Waist trajectory", frame)
 
         key = cv2.waitKey(1) & 0xFF
 
         if key == ord("q"):
-            cap01.release()
-            cap02.release()
-            out01.release()
-            out02.release()
+            cap.release()
+            out.release()
             cv2.destroyAllWindows()
             break
 
         if key == ord("w"):
-            bpoints01 = gpoints01 = rpoints01 = ypoints01 = [deque(maxlen=512)]
-            bindex01 = gindex01 = rindex01 = yindex01 = 0
-            bpoints02 = gpoints02 = rpoints02 = ypoints02 = [deque(maxlen=512)]
-            bindex02 = gindex02 = rindex02 = yindex02 = 0
+            bpoints = gpoints = rpoints = ypoints = [deque(maxlen=512)]
+            bindex = gindex = rindex = yindex = 0
 
-            fbUpperBodyTrajectory = []
             fbWaistTrajectory = []
 
             xBody = []
             xAbs = 0
             l = 0
 
-            out01.release()
-            out02.release()
+            out.release()
 
-            out01 = cv2.VideoWriter('video/output' + str(1 + fileSize) +  '.webm',fourcc, 25, (1280, 960))
-            out02 = cv2.VideoWriter('video/output' + str(2 + fileSize) + '.webm',fourcc, 25, (1280, 960))
+            out = cv2.VideoWriter('video/output' + str(1 + fileSize) +  '.webm',fourcc, 25, (1280, 960))
 
-        if key == ord("s"):
-            cv2.imwrite('photo/photo1.jpg', frame01)
-            cv2.imwrite('photo/photo2.jpg', frame02)
-
-    path01 = 'video/output' + str(1 + fileSize) + '.webm'
-    path02 = 'video/output' + str(2 + fileSize) + '.webm'
+    path = 'video/output' + str(1 + fileSize) + '.webm'
     storage = firebase.storage()
-    storage.child('video/output' + str(1 + fileSize) + '.webm').put(path01)
-    storage.child('video/output' + str(2 + fileSize) + '.webm').put(path02)
-    url01 = storage.child('video/output' + str(1 + fileSize) + '.webm').get_url(token=None)
-    url02 = storage.child('video/output' + str(2 + fileSize) + '.webm').get_url(token=None)
-    #print('svg01URL: {0} \nsvg02URL: {1}'.format(url02, url01))
+    storage.child('video/output' + str(1 + fileSize) + '.webm').put(path)
+    url = storage.child('video/output' + str(1 + fileSize) + '.webm').get_url(token=None)
+    print('svgURL: {0}'.format(url))
 
     ref = db.reference('/public_resource')
     ref.push({
-        'UpperBodyTrajectory': fbUpperBodyTrajectory,
         'WaistTrajectory': fbWaistTrajectory,
-        'URL01': url01,
-        'URL02': url02
+        'URL': url
     })
 
     print(ref.get())
