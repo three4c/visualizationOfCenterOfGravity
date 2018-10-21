@@ -79,8 +79,8 @@ if __name__ == '__main__':
     fileSize = len(file)
 
     cap = cv2.VideoCapture(1)
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    out = cv2.VideoWriter('video/output' + str(1 + fileSize) + '.webm',fourcc, 20, (1280, 960))
+    fourcc = cv2.VideoWriter_fourcc(*'AVC1')
+    out = cv2.VideoWriter('video/output' + str(1 + fileSize) + '.mp4',fourcc, 20, (1280, 960))
 
     xBody = []
     xAbs = 0
@@ -153,18 +153,20 @@ if __name__ == '__main__':
 
             out.release()
 
-            out = cv2.VideoWriter('video/output' + str(1 + fileSize) +  '.webm',fourcc, 25, (1280, 960))
+            out = cv2.VideoWriter('video/output' + str(1 + fileSize) +  '.mp4',fourcc, 25, (1280, 960))
 
-    path = 'video/output' + str(1 + fileSize) + '.webm'
+    path = 'video/output' + str(1 + fileSize) + '.mp4'
     storage = firebase.storage()
-    storage.child('video/output' + str(1 + fileSize) + '.webm').put(path)
-    url = storage.child('video/output' + str(1 + fileSize) + '.webm').get_url(token=None)
-    print('svgURL: {0}'.format(url))
+    storage.child('video/output' + str(1 + fileSize) + '.mp4').put(path)
+    url = storage.child('video/output' + str(1 + fileSize) + '.mp4').get_url(token=None)
+    fileName = 'output' + str(1 + fileSize) + '.mp4'
+    print('{0} : {1}'.format(fileName, url))
 
     ref = db.reference('/public_resource')
     ref.push({
         'WaistTrajectory': fbWaistTrajectory,
-        'URL': url
+        'URL': url,
+        'FileName': fileName
     })
 
     print(ref.get())
