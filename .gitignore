@@ -1,4 +1,8 @@
-.env
 *.json
-video
+.env
+.DS_Store
+video0
+video1
+video2
+video3
 prototype.py
