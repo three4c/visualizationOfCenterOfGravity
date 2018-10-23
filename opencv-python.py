@@ -1,18 +1,21 @@
 import numpy as np
 import cv2
 import os
+import glob
+import time
 from collections import deque
 
-# firebase
+# Firebase
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
 
-#Pyrebase
+# Pyrebase
 import pyrebase
 
-#dotenv
+# Dotenv
 import settings
+
 JSON_PATH = settings.JP
 API_KEY = settings.AP
 AUTH_DOMAIN = settings.AD
@@ -33,7 +36,7 @@ config = {
 }
 firebase = pyrebase.initialize_app(config)
 
-# Color
+# Color Class
 class Red:
     def __init__(self):
         self.lower = np.array([150, 50, 50])
@@ -49,6 +52,7 @@ class Green:
         self.lower = np.array([40, 50, 50])
         self.upper = np.array([80, 255, 255])
 
+# Tracking Function
 def colorTracking(frame, colorObj):
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(hsv, colorObj.lower, colorObj.upper)
@@ -66,7 +70,17 @@ def colorTracking(frame, colorObj):
 
     return rects
 
+# Main
 if __name__ == '__main__':
+    print ('0: Expert\n1: Bigginer01\n2: Bigginer02\n3: Bigginer03\nPlease select one...')
+    video = input('>>> ')
+    print (('What was input... ') + video)
+
+    if video == '0': resource = 'public_resource'
+    elif video == '1': resource = 'bigginer1'
+    elif video == '2': resource = 'bigginer2'
+    else: resource = 'bigginer3'
+
     kernel = np.ones((5, 5), np.uint8)
     bpoints = gpoints = rpoints = ypoints = [deque(maxlen=512)]
     bindex = gindex = rindex = yindex = 0
@@ -74,99 +88,104 @@ if __name__ == '__main__':
 
     fbWaistTrajectory = []
 
-    path = './video'
-    file = os.listdir(path)
+    path = './video' + video + '/*.mp4'
+    file = glob.glob(path)
     fileSize = len(file)
 
     cap = cv2.VideoCapture(1)
     fourcc = cv2.VideoWriter_fourcc(*'AVC1')
-    out = cv2.VideoWriter('video/output' + str(1 + fileSize) + '.mp4',fourcc, 20, (1280, 960))
+    out = cv2.VideoWriter('video' + video + '/output' + str(1 + fileSize) + '.mp4',fourcc, 20, (1280, 960))
 
     xBody = []
     xAbs = 0
     l = 0
 
     while(True):
-        _, frame = cap.read()
-        rectsGreen = colorTracking(frame, Blue())
+        ret, frame = cap.read()
+        if ret == True:
+            rectsGreen = colorTracking(frame, Green())
 
-        if len(rectsGreen) > 0:
-            height = [0, 0]
-            lx, ly, lw, lh = max(rectsGreen, key=(lambda x: x[2] * x[3]))
-            cv2.rectangle(frame, (lx, ly), (lx + lw, ly + lh), (0, 255, 0), 3)
-            cv2.circle(frame, (int(lx + lw / 2), int(ly + lh / 2)), 5, (0,0,255), -1)
-            center = (int(lx + lw / 2), int(ly + lh / 2))
-            bpoints[bindex].appendleft(center)
-            xBody.append(int(lx + lw / 2))
-            xAbs += abs(xBody[l-1] - xBody[l])
-            height = (xAbs, int(ly + lh / 2))
-            fbWaistTrajectory.append(height)
-            l += 1
+            if len(rectsGreen) > 0:
+                height = [0, 0]
+                lx, ly, lw, lh = max(rectsGreen, key=(lambda x: x[2] * x[3]))
+                cv2.rectangle(frame, (lx, ly), (lx + lw, ly + lh), (0, 255, 0), 3)
+                cv2.circle(frame, (int(lx + lw / 2), int(ly + lh / 2)), 5, (0,0,255), -1)
+                center = (int(lx + lw / 2), int(ly + lh / 2))
+                bpoints[bindex].appendleft(center)
+                xBody.append(int(lx + lw / 2))
+                xAbs += abs(xBody[l-1] - xBody[l])
+                height = (xAbs, int(ly + lh / 2))
+                fbWaistTrajectory.append(height)
+                l += 1
 
+            else:
+                bpoints.append(deque(maxlen=512))
+                bindex += 1
+                gpoints.append(deque(maxlen=512))
+                gindex += 1
+                rpoints.append(deque(maxlen=512))
+                rindex += 1
+                ypoints.append(deque(maxlen=512))
+                yindex += 1
+
+            points = [bpoints, gpoints, rpoints, ypoints]
+
+            for i in range(len(points)):
+                for j in range(len(points[i])):
+                    xFront = 0
+                    xBack = 0
+                    for k in range(1, len(points[i][j])):
+                        if points[i][j][k - 1] is None or points[i][j][k] is None: continue
+                        # Line graph
+                        front = points[i][j][k - 1]
+                        back = points[i][j][k]
+                        xBack += abs(front[0] - back[0])
+                        cv2.line(frame, (xFront, front[1]), (xBack, back[1]), colors[1], 2)
+                        xFront = xBack
+
+            out.write(frame)
+
+            cv2.namedWindow("Waist trajectory", cv2.WINDOW_NORMAL)
+            cv2.imshow("Waist trajectory", frame)
+
+            key = cv2.waitKey(1) & 0xFF
+
+            if key == ord("q"):
+                cap.release()
+                out.release()
+                cv2.destroyAllWindows()
+                break
+
+            if key == ord("w"):
+                bpoints = gpoints = rpoints = ypoints = [deque(maxlen=512)]
+                bindex = gindex = rindex = yindex = 0
+
+                fbWaistTrajectory = []
+
+                xBody = []
+                xAbs = 0
+                l = 0
+
+                out.release()
+
+                out = cv2.VideoWriter('video' + video + '/output' + str(1 + fileSize) + '.mp4',fourcc, 20, (1280, 960))
         else:
-            bpoints.append(deque(maxlen=512))
-            bindex += 1
-            gpoints.append(deque(maxlen=512))
-            gindex += 1
-            rpoints.append(deque(maxlen=512))
-            rindex += 1
-            ypoints.append(deque(maxlen=512))
-            yindex += 1
+            time.sleep(2)
 
-        points = [bpoints, gpoints, rpoints, ypoints]
-
-        for i in range(len(points)):
-            for j in range(len(points[i])):
-                xFront = 0
-                xBack = 0
-                for k in range(1, len(points[i][j])):
-                    if points[i][j][k - 1] is None or points[i][j][k] is None: continue
-                    # Line graph
-                    front = points[i][j][k - 1]
-                    back = points[i][j][k]
-                    xBack += abs(front[0] - back[0])
-                    cv2.line(frame, (xFront, front[1]), (xBack, back[1]), colors[1], 2)
-                    xFront = xBack
-
-        out.write(frame)
-
-        cv2.namedWindow("Waist trajectory", cv2.WINDOW_NORMAL)
-        cv2.imshow("Waist trajectory", frame)
-
-        key = cv2.waitKey(1) & 0xFF
-
-        if key == ord("q"):
-            cap.release()
-            out.release()
-            cv2.destroyAllWindows()
-            break
-
-        if key == ord("w"):
-            bpoints = gpoints = rpoints = ypoints = [deque(maxlen=512)]
-            bindex = gindex = rindex = yindex = 0
-
-            fbWaistTrajectory = []
-
-            xBody = []
-            xAbs = 0
-            l = 0
-
-            out.release()
-
-            out = cv2.VideoWriter('video/output' + str(1 + fileSize) +  '.mp4',fourcc, 25, (1280, 960))
-
-    path = 'video/output' + str(1 + fileSize) + '.mp4'
+    # Firebase Storage
+    path = 'video' + video + '/output' + str(1 + fileSize) + '.mp4'
     storage = firebase.storage()
-    storage.child('video/output' + str(1 + fileSize) + '.mp4').put(path)
-    url = storage.child('video/output' + str(1 + fileSize) + '.mp4').get_url(token=None)
+    storage.child('video' + video + '/output' + str(1 + fileSize) + '.mp4').put(path)
+    url = storage.child('video' + video + '/output' + str(1 + fileSize) + '.mp4').get_url(token=None)
     fileName = 'output' + str(1 + fileSize) + '.mp4'
-    print('{0} : {1}'.format(fileName, url))
 
-    ref = db.reference('/public_resource')
+    # Firebase Realtime Database
+    ref = db.reference(resource)
     ref.push({
         'WaistTrajectory': fbWaistTrajectory,
         'URL': url,
         'FileName': fileName
     })
 
-    print(ref.get())
+    print('Folder Name: video{0}\nLocal Foloder Size: {1}\nFile Name: {2}\nFile URL: {3}\nResource Name: {4}'.format(video, fileSize, fileName, url, resource))
+    # print(ref.get())
