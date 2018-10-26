@@ -1,6 +1,5 @@
 import numpy as np
 import cv2
-import os
 import glob
 import time
 from collections import deque
@@ -10,31 +9,16 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
 
-# Pyrebase
-import pyrebase
-
-# Dotenv
+#dotenv
 import settings
-
 JSON_PATH = settings.JP
-API_KEY = settings.AP
-AUTH_DOMAIN = settings.AD
 DATABASE_URL = settings.DB
-STORAGE_BUCKET = settings.SB
 
 cred = credentials.Certificate(JSON_PATH)
 firebase_admin.initialize_app(cred, {
     'databaseURL': DATABASE_URL,
     'databaseAuthVariableOverride': None
 })
-
-config = {
-  'apiKey': API_KEY,
-  'authDomain': AUTH_DOMAIN,
-  'databaseURL': DATABASE_URL,
-  'storageBucket': STORAGE_BUCKET
-}
-firebase = pyrebase.initialize_app(config)
 
 # Color Class
 class Red:
@@ -72,14 +56,14 @@ def colorTracking(frame, colorObj):
 
 # Main
 if __name__ == '__main__':
-    print ('0: Expert\n1: Bigginer01\n2: Bigginer02\n3: Bigginer03\nPlease select one...')
+    print ('0: Expert\n1: biginner01\n2: biginner02\n3: biginner03\nPlease select one...')
     video = input('>>> ')
     print (('What was input... ') + video)
 
-    if video == '0': resource = 'public_resource'
-    elif video == '1': resource = 'bigginer1'
-    elif video == '2': resource = 'bigginer2'
-    else: resource = 'bigginer3'
+    if video == '0': resource = 'expert'
+    elif video == '1': resource = 'biginner1'
+    elif video == '2': resource = 'biginner2'
+    else: resource = 'biginner3'
 
     kernel = np.ones((5, 5), np.uint8)
     bpoints = gpoints = rpoints = ypoints = [deque(maxlen=512)]
@@ -88,13 +72,13 @@ if __name__ == '__main__':
 
     fbWaistTrajectory = []
 
-    path = './video' + video + '/*.mp4'
+    path = '../visualization/src/assets/video' + video + '/*.mp4'
     file = glob.glob(path)
     fileSize = len(file)
 
     cap = cv2.VideoCapture(1)
     fourcc = cv2.VideoWriter_fourcc(*'AVC1')
-    out = cv2.VideoWriter('video' + video + '/output' + str(1 + fileSize) + '.mp4',fourcc, 20, (1280, 960))
+    out = cv2.VideoWriter('../visualization/src/assets/video' + video + '/output' + str(1 + fileSize) + '.mp4',fourcc, 20, (1280, 960))
 
     xBody = []
     xAbs = 0
@@ -168,24 +152,19 @@ if __name__ == '__main__':
 
                 out.release()
 
-                out = cv2.VideoWriter('video' + video + '/output' + str(1 + fileSize) + '.mp4',fourcc, 20, (1280, 960))
+                out = cv2.VideoWriter('../visualization/src/assets/video' + video + '/output' + str(1 + fileSize) + '.mp4',fourcc, 20, (1280, 960))
         else:
             time.sleep(2)
 
-    # Firebase Storage
-    path = 'video' + video + '/output' + str(1 + fileSize) + '.mp4'
-    storage = firebase.storage()
-    storage.child('video' + video + '/output' + str(1 + fileSize) + '.mp4').put(path)
-    url = storage.child('video' + video + '/output' + str(1 + fileSize) + '.mp4').get_url(token=None)
     fileName = 'output' + str(1 + fileSize) + '.mp4'
 
     # Firebase Realtime Database
-    ref = db.reference(resource)
-    ref.push({
+    ref = db.reference('public_resource')
+    childRef = ref.child(resource)
+    childRef.push({
         'WaistTrajectory': fbWaistTrajectory,
-        'URL': url,
         'FileName': fileName
     })
 
-    print('Folder Name: video{0}\nLocal Foloder Size: {1}\nFile Name: {2}\nFile URL: {3}\nResource Name: {4}'.format(video, fileSize, fileName, url, resource))
+    print('Folder Name: video{0}\nLocal Foloder Size: {1}\nFile Name: {2}\nResource Name: {3}'.format(video, fileSize, fileName, resource))
     # print(ref.get())
