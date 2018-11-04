@@ -60,10 +60,10 @@ if __name__ == '__main__':
     video = input('>>> ')
     print (('What was input... ') + video)
 
-    if video == '0': resource = 'expert'
-    elif video == '1': resource = 'biginner1'
-    elif video == '2': resource = 'biginner2'
-    else: resource = 'biginner3'
+    if video == '0': resource = 'expert' # kanata
+    elif video == '1': resource = 'biginner1' # どいちゃん
+    elif video == '2': resource = 'biginner2' # わたる
+    else: resource = 'biginner3' # ジョージ
 
     kernel = np.ones((5, 5), np.uint8)
     bpoints = gpoints = rpoints = ypoints = [deque(maxlen=512)]
@@ -87,7 +87,7 @@ if __name__ == '__main__':
     while(True):
         ret, frame = cap.read()
         if ret == True:
-            rectsGreen = colorTracking(frame, Green())
+            rectsGreen = colorTracking(frame, Blue())
 
             if len(rectsGreen) > 0:
                 height = [0, 0]
