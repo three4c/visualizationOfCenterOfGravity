@@ -3,6 +3,7 @@ import cv2
 import glob
 import time
 from collections import deque
+from datetime import datetime
 
 # Firebase
 import firebase_admin
@@ -71,6 +72,8 @@ if __name__ == '__main__':
     colors = [(0, 255, 0), (0, 0, 255)]
 
     fbWaistTrajectory = []
+
+    date = datetime.now().strftime('%Y.%m.%d')
 
     path = '../visualization/src/assets/video' + video + '/*.mp4'
     file = glob.glob(path)
@@ -163,6 +166,7 @@ if __name__ == '__main__':
     childRef = ref.child(resource)
     childRef.push({
         'WaistTrajectory': fbWaistTrajectory,
+        'Date': date,
         'FileName': fileName
     })
 
