@@ -57,14 +57,15 @@ def colorTracking(frame, colorObj):
 
 # Main
 if __name__ == '__main__':
-    print ('0: Expert\n1: biginner01\n2: biginner02\n3: biginner03\nPlease select one...')
+    print ('0: Expert\n1: Biginner01\n2: Biginner02\n3: Biginner03\n4: Biginner04\nPlease select one...')
     video = input('>>> ')
     print (('What was input... ') + video)
 
     if video == '0': resource = 'expert' # kanata
     elif video == '1': resource = 'biginner1' # どいちゃん
     elif video == '2': resource = 'biginner2' # わたる
-    else: resource = 'biginner3' # ジョージ
+    elif video == '3': resource = 'biginner3' # ジョージ
+    else: resource = 'biginner4' # ボンちゃん
 
     kernel = np.ones((5, 5), np.uint8)
     bpoints = gpoints = rpoints = ypoints = [deque(maxlen=512)]
