@@ -1,6 +1,5 @@
-# Windmill
-Web development of visualization of windmill
-
+# Visualization Of Center Of Gravity
+Web development of visualization of center of gravity.
 
 ## Build Setup
 ### install
